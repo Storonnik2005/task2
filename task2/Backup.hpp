@@ -5,6 +5,7 @@
 #include <vector>
 #include <ctime>
 #include <stdexcept>
+#include <iostream>
 
 // Класс для объекта резервного копирования (файл или данные)
 class BackupObject {
@@ -55,6 +56,36 @@ private:
     std::vector<RestorePoint> restorePoints_;
     IStorage* storage_;
     IBackupAlgorithm* algorithm_;
+};
+
+// Реализация хранилища
+class FileStorage : public IStorage {
+public:
+    void save(const std::string& data, const std::string& destination) override {
+        std::cout << "Saving " << data << " to " << destination << std::endl;
+    }
+};
+
+// Реализация алгоритма раздельного хранения
+class SplitStorageAlgorithm : public IBackupAlgorithm {
+public:
+    void execute(const std::vector<BackupObject>& objects, IStorage* storage) override {
+        for (const auto& obj : objects) {
+            storage->save("Backup of " + obj.getPath(), obj.getPath() + ".backup");
+        }
+    }
+};
+
+// Реализация алгоритма общего хранения
+class SingleStorageAlgorithm : public IBackupAlgorithm {
+public:
+    void execute(const std::vector<BackupObject>& objects, IStorage* storage) override {
+        std::string combinedData = "Combined backup: ";
+        for (const auto& obj : objects) {
+            combinedData += obj.getPath() + " ";
+        }
+        storage->save(combinedData, "single_backup.archive");
+    }
 };
 
 #endif

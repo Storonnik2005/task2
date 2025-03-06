@@ -26,29 +26,3 @@ void BackupJob::createRestorePoint() {
 std::vector<RestorePoint> BackupJob::getRestorePoints() const {
     return restorePoints_;
 }
-class FileStorage : public IStorage {
-public:
-    void save(const std::string& data, const std::string& destination) override {
-        std::cout << "Saving " << data << " to " << destination << std::endl;
-    }
-};
-
-class SplitStorageAlgorithm : public IBackupAlgorithm {
-public:
-    void execute(const std::vector<BackupObject>& objects, IStorage* storage) override {
-        for (const auto& obj : objects) {
-            storage->save("Backup of " + obj.getPath(), obj.getPath() + ".backup");
-        }
-    }
-};
-
-class SingleStorageAlgorithm : public IBackupAlgorithm {
-public:
-    void execute(const std::vector<BackupObject>& objects, IStorage* storage) override {
-        std::string combinedData = "Combined backup: ";
-        for (const auto& obj : objects) {
-            combinedData += obj.getPath() + " ";
-        }
-        storage->save(combinedData, "single_backup.archive");
-    }
-};
